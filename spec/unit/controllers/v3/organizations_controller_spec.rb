@@ -828,5 +828,47 @@ RSpec.describe OrganizationsV3Controller, type: :controller do
         expect(response.body).to include 'Organization not found'
       end
     end
+
+    describe 'org suspensions' do
+      let(:org) { VCAP::CloudController::Organization.make(name: 'name3') }
+      let(:manager) { make_manager_for_org(org) }
+
+      before do
+        set_current_user(manager)
+      end
+
+      context 'when the org is active' do
+        before do
+          org.update(status: VCAP::CloudController::Organization::ACTIVE)
+        end
+
+        it 'can update and read the org' do
+          patch :update, params: { guid: org.guid }.merge({ name: 'name4' }), as: :json
+          expect(response.status).to eq(200)
+
+          get :show, params: { guid: org.guid }, as: :json
+          expect(response.status).to eq(200)
+          expect(parsed_body['name']).to eq('name4')
+        end
+      end
+
+      context 'when the org is suspended' do
+        before do
+          org.update(status: VCAP::CloudController::Organization::SUSPENDED)
+        end
+
+        it 'cannot update the org' do
+          patch :update, params: { guid: org.guid }.merge({ name: 'name5' }), as: :json
+          expect(response.status).to eq(403)
+          expect(response.message).to eq(403)
+        end
+
+        it 'can read the org' do
+          get :show, params: { guid: org.guid }, as: :json
+          expect(response.status).to eq(200)
+          expect(parsed_body['name']).to eq('name4')
+        end
+      end
+    end
   end
 end

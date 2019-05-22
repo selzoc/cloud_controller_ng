@@ -727,6 +727,49 @@ module VCAP::CloudController
       end
     end
 
+    describe 'PUT /v2/organizations/:guid' do
+      let(:org) { Organization.make(name: 'name1') }
+      let(:manager) { make_manager_for_org(org) }
+
+      before do
+        set_current_user(manager)
+      end
+
+      context 'when the org is active' do
+        before do
+          org.update(status: Organization::ACTIVE)
+        end
+        it 'updates the org name' do
+          put "/v2/organizations/#{org.guid}", MultiJson.dump({ name: 'name2' })
+
+          expect(last_response.status).to eq(201)
+          get "/v2/organizations/#{org.guid}"
+          expect(last_response.status).to eq(200), last_response.body
+          expect(parsed_response['entity']['status']).to eq('active')
+          expect(parsed_response['entity']['name']).to eq('name2')
+        end
+      end
+
+      context 'when the org is not active' do
+        before do
+          org.update(status: Organization::SUSPENDED)
+        end
+
+        it 'fails to update the org name' do
+          put "/v2/organizations/#{org.guid}", MultiJson.dump({ name: 'name3' })
+          expect(last_response.status).to eq(422)
+          expect(decoded_response['description']).to eq("The org is suspended")
+        end
+
+        it 'can read the org' do
+          get "/v2/organizations/#{org.guid}"
+          expect(last_response.status).to eq(200), last_response.body
+          expect(parsed_response['entity']['status']).to eq('suspended')
+          expect(parsed_response['entity']['name']).to eq('name1')
+        end
+      end
+    end
+
     describe 'GET /v2/organizations/:guid/user_roles' do
       context 'when the user is admin' do
         let(:mgr) { User.make(guid: 'mgr-lemon') }
@@ -784,6 +827,38 @@ module VCAP::CloudController
           expect(parsed_response['resources'].size).to eq(1)
           parts = parsed_response['resources'].map { |res| [res['metadata']['guid'], res['entity']['organization_roles'].sort] }
           expect(parts).to match_array([[mgr.guid, %w/org_manager org_user/]])
+        end
+      end
+
+      context 'for a reg org as manager' do
+        let(:mgr) { User.make(guid: 'mgr-lemon') }
+        let(:org) { Organization.make(manager_guids: [mgr.guid], user_guids: [mgr.guid]) }
+        let(:isolation_segment) { IsolationSegmentModel.make }
+        let(:isolation_segment2) { IsolationSegmentModel.make }
+
+        before do
+          allow(uaa_client).to receive(:usernames_for_ids).and_return({})
+          set_current_user(mgr)
+
+          # org.update(status: 'suspended')
+        end
+
+        context 'when the user is neither admin nor org manager' do
+          let(:space) { Space.make(organization: org) }
+          let!(:user) { mgr }
+
+          before do
+            assigner.assign(isolation_segment, [org])
+          end
+
+          it 'returns a 403' do
+            put "/v2/organizations/#{org.guid}", MultiJson.dump({
+              default_isolation_segment_guid: isolation_segment.guid
+            })
+
+            expect(last_response.status).to eq(401)
+            expect(decoded_response['error_code']).to match(/CF-NotAuthorized/)
+          end
         end
       end
 
