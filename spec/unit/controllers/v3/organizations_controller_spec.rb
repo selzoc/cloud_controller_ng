@@ -830,7 +830,7 @@ RSpec.describe OrganizationsV3Controller, type: :controller do
     end
 
     describe 'org suspensions' do
-      let(:org) { VCAP::CloudController::Organization.make(name: 'name3') }
+      let(:org) { VCAP::CloudController::Organization.make(name: 'name1') }
       let(:manager) { make_manager_for_org(org) }
 
       before do
@@ -843,12 +843,12 @@ RSpec.describe OrganizationsV3Controller, type: :controller do
         end
 
         it 'can update and read the org' do
-          patch :update, params: { guid: org.guid }.merge({ name: 'name4' }), as: :json
+          patch :update, params: { guid: org.guid }.merge({ name: 'name2' }), as: :json
           expect(response.status).to eq(200)
 
           get :show, params: { guid: org.guid }, as: :json
           expect(response.status).to eq(200)
-          expect(parsed_body['name']).to eq('name4')
+          expect(parsed_body['name']).to eq('name2')
         end
       end
 
@@ -858,15 +858,15 @@ RSpec.describe OrganizationsV3Controller, type: :controller do
         end
 
         it 'cannot update the org' do
-          patch :update, params: { guid: org.guid }.merge({ name: 'name5' }), as: :json
-          expect(response.status).to eq(403)
-          expect(response.message).to eq(403)
+          patch :update, params: { guid: org.guid }.merge({ name: 'name3' }), as: :json
+          expect(response.status).to eq(422)
+          expect(response.message).to eq("The org 'name1' is suspended")
         end
 
         it 'can read the org' do
           get :show, params: { guid: org.guid }, as: :json
           expect(response.status).to eq(200)
-          expect(parsed_body['name']).to eq('name4')
+          expect(parsed_body['name']).to eq('name1')
         end
       end
     end

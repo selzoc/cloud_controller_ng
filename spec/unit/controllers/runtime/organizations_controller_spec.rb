@@ -736,9 +736,6 @@ module VCAP::CloudController
       end
 
       context 'when the org is active' do
-        before do
-          org.update(status: Organization::ACTIVE)
-        end
         it 'updates the org name' do
           put "/v2/organizations/#{org.guid}", MultiJson.dump({ name: 'name2' })
 
@@ -755,17 +752,17 @@ module VCAP::CloudController
           org.update(status: Organization::SUSPENDED)
         end
 
-        it 'fails to update the org name' do
-          put "/v2/organizations/#{org.guid}", MultiJson.dump({ name: 'name3' })
-          expect(last_response.status).to eq(422)
-          expect(decoded_response['description']).to eq("The org is suspended")
-        end
-
         it 'can read the org' do
           get "/v2/organizations/#{org.guid}"
           expect(last_response.status).to eq(200), last_response.body
           expect(parsed_response['entity']['status']).to eq('suspended')
           expect(parsed_response['entity']['name']).to eq('name1')
+        end
+
+        it 'fails to update the org name' do
+          put "/v2/organizations/#{org.guid}", MultiJson.dump({ name: 'name3' })
+          expect(last_response.status).to eq(422)
+          expect(decoded_response['description']).to eq("The org 'name1' is suspended")
         end
       end
     end
