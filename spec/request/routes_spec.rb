@@ -378,31 +378,6 @@ RSpec.describe 'Routes Request' do
       it_behaves_like 'permissions for single object endpoint', ALL_PERMISSIONS
     end
 
-    context 'when the user is not a member in the routes org' do
-      let(:other_space) { VCAP::CloudController::Space.make }
-      let(:domain) { VCAP::CloudController::PrivateDomain.make(owning_organization: other_space.organization) }
-      let(:route) { VCAP::CloudController::Route.make(space: other_space, domain: domain) }
-
-      let(:expected_codes_and_responses) do
-        h = Hash.new(code: 404)
-        h['admin'] = {
-          code: 200,
-          response_object: route_json
-        }
-        h['admin_read_only'] = {
-          code: 200,
-          response_object: route_json
-        }
-        h['global_auditor'] = {
-          code: 200,
-          response_object: route_json
-        }
-        h
-      end
-
-      it_behaves_like 'permissions for single object endpoint', ALL_PERMISSIONS
-    end
-
     describe 'when the user is not logged in' do
       it 'returns 401 for Unauthenticated requests' do
         get "/v3/routes/#{route.guid}", nil, base_json_headers
@@ -1567,6 +1542,72 @@ RSpec.describe 'Routes Request' do
       it 'returns 401 for Unauthenticated requests' do
         delete "/v3/routes/#{route.guid}", nil, base_json_headers
         expect(last_response.status).to eq(401)
+      end
+    end
+  end
+
+  describe 'GET /v3/routes/:guid/destinations' do
+    let(:route) { VCAP::CloudController::Route.make(space: space) }
+    let(:app_model) { VCAP::CloudController::AppModel.make(space: space) }
+    let!(:destination) { VCAP::CloudController::RouteMappingModel.make(app: app_model, route: route, process_type: 'web') }
+    let(:api_call) { lambda { |user_headers| get "/v3/routes/#{route.guid}/destinations", nil, user_headers } }
+    let(:response_json) do
+      {
+        destinations: [
+          {
+            guid: destination.guid,
+            app: {
+              guid: app_model.guid,
+              process: {
+                type: 'web'
+              }
+            }
+          }
+        ],
+        links: {
+          self: { href: %r(#{Regexp.escape(link_prefix)}\/v3\/routes\/#{route.guid}\/destinations) },
+          route: { href: %r(#{Regexp.escape(link_prefix)}\/v3\/routes\/#{route.guid}) }
+        }
+      }
+    end
+
+    context 'when the user is a member in the routes org' do
+      let(:expected_codes_and_responses) do
+        h = Hash.new(
+          code: 200,
+          response_object: response_json
+        )
+
+        h['org_billing_manager'] = { code: 404 }
+        h['no_role'] = { code: 404 }
+        h
+      end
+
+      it_behaves_like 'permissions for single object endpoint', ALL_PERMISSIONS
+    end
+
+    context 'when the route does not exist' do
+      let(:user_header) { headers_for(user) }
+
+      it 'returns not found' do
+        get '/v3/routes/does-not-exist/destinations', nil, user_header
+        expect(last_response.status).to eq(404)
+      end
+    end
+
+    context 'when the user is not logged in' do
+      it 'returns 401 for Unauthenticated requests' do
+        get '/v3/routes/guid/destinations'
+        expect(last_response.status).to eq(401)
+      end
+    end
+
+    context 'when the user does not have the required scopes' do
+      let(:user_header) { headers_for(user, scopes: []) }
+
+      it 'returns a 403' do
+        get "/v3/routes/#{route.guid}/destinations", nil, user_header
+        expect(last_response.status).to eq(403)
       end
     end
   end

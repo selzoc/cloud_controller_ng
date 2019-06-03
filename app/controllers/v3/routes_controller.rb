@@ -3,6 +3,7 @@ require 'messages/routes_list_message'
 require 'messages/route_show_message'
 require 'messages/route_update_message'
 require 'presenters/v3/route_presenter'
+require 'presenters/v3/route_destinations_presenter'
 require 'presenters/v3/paginated_list_presenter'
 require 'actions/route_create'
 require 'actions/route_delete'
@@ -84,6 +85,16 @@ class RoutesController < ApplicationController
 
     url_builder = VCAP::CloudController::Presenters::ApiUrlBuilder.new
     head :accepted, 'Location' => url_builder.build_url(path: "/v3/jobs/#{pollable_job.guid}")
+  end
+
+  def index_destinations
+    message = RouteShowMessage.new({ guid: hashed_params['guid'] })
+    unprocessable!(message.errors.full_messages) unless message.valid?
+
+    route = Route.find(guid: message.guid)
+    route_not_found! unless route && permission_queryer.can_read_route?(route.space.guid, route.organization.guid)
+
+    render status: :ok, json: Presenters::V3::RouteDestinationsPresenter.new(route)
   end
 
   private
