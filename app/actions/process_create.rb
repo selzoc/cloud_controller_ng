@@ -4,6 +4,8 @@ require 'models/helpers/health_check_types'
 
 module VCAP::CloudController
   class ProcessCreate
+    class InvalidProcess < StandardError; end
+
     def initialize(user_audit_info, manifest_triggered: false)
       @user_audit_info = user_audit_info
       @manifest_triggered = manifest_triggered
@@ -17,7 +19,7 @@ module VCAP::CloudController
         health_check_type: default_health_check_type(type),
         metadata:          {},
       })
-      attrs[:guid] = app.guid if type == ProcessTypes::WEB
+      attrs[:guid] ||= app.guid if type == ProcessTypes::WEB
 
       process = nil
       app.class.db.transaction do

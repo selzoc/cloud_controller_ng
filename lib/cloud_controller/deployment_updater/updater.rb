@@ -67,13 +67,6 @@ module VCAP::CloudController
           app.lock!
           deploying_web_process.lock!
 
-          target_completion_rate = deployment.labels.find {|x| x.key_name == 'target_completion_rate'}&.value&.to_f || 1.0
-          if target_completion_rate < 1.0 &&
-            deploying_web_process.instances >= target_completion_rate * deployment.original_web_process_instance_count
-            # Temporary stationary spot
-            return
-          end
-
           if !ready_to_scale?
             deployment.update(state: DeploymentModel::FAILING_STATE) if deployment.should_fail?
             return

@@ -196,23 +196,6 @@ module VCAP::CloudController
             expect(non_web_process2.reload.command).to be_nil
           end
         end
-
-        context 'when the target completion rate has been reached' do
-          let(:current_deploying_instances) { original_web_process_instance_count - 1 }
-          let(:target_completion_rate) { current_deploying_instances.to_f / original_web_process_instance_count  - 0.0001 }
-
-          before do
-            LabelsUpdate.update(deployment, {'target_completion_rate' => target_completion_rate}, DeploymentLabelModel)
-          end
-          it "doesn't change the instance count" do
-            before_web_process_count = web_process.reload.instances
-            before_deploying_web_process_count = deploying_web_process.reload.instances
-            subject.scale
-            expect(logger).not_to have_received(:error)
-            expect(web_process.reload.instances).to eq(before_web_process_count)
-            expect(deploying_web_process.reload.instances).to eq(before_deploying_web_process_count)
-          end
-        end
       end
 
       context 'when the (oldest) web process will be at zero instances and is type web' do

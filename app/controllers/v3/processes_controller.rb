@@ -2,6 +2,7 @@ require 'presenters/v3/paginated_list_presenter'
 require 'presenters/v3/process_presenter'
 require 'presenters/v3/process_stats_presenter'
 require 'cloud_controller/paging/pagination_options'
+require 'actions/process_create'
 require 'actions/process_delete'
 require 'fetchers/process_list_fetcher'
 require 'fetchers/process_fetcher'
@@ -9,6 +10,7 @@ require 'actions/process_scale'
 require 'actions/process_terminate'
 require 'actions/process_update'
 require 'messages/process_scale_message'
+require 'messages/process_create_message'
 require 'messages/process_update_message'
 require 'messages/processes_list_message'
 require 'controllers/v3/mixins/app_sub_resource'
@@ -46,6 +48,26 @@ class ProcessesController < ApplicationController
   def show
     # TODO
     render status: :ok, json: Presenters::V3::ProcessPresenter.new(@process, show_secrets: permission_queryer.can_read_secrets_in_space?(@space.guid, @space.organization.guid))
+  end
+
+  def create
+    message = ProcessCreateMessage.new(unmunged_body)
+    unprocessable!(message.errors.full_messages) unless message.valid?
+
+    app = AppModel.first(guid: message.app_guid)
+    app_not_found! unless app && permission_queryer.can_read_from_space?(app.space.guid, app.organization.guid)
+
+    process_attrs = {}
+    process_attrs[:type] = message.type
+    process_attrs[:revision_guid] = message.revision_guid
+    process_attrs[:guid] = SecureRandom.uuid
+    process_attrs[:state] = app.desired_state
+
+    process = ProcessCreate.new(user_audit_info).create(app, process_attrs)
+
+    render status: :ok, json: Presenters::V3::ProcessPresenter.new(process)
+  rescue ProcessCreate::InvalidProcess => e
+    unprocessable!(e.message)
   end
 
   def update

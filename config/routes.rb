@@ -49,6 +49,7 @@ Rails.application.routes.draw do
 
   # processes
   get '/processes', to: 'processes#index'
+  post '/processes', to: 'processes#create'
   get '/processes/:process_guid', to: 'processes#show'
   patch '/processes/:process_guid', to: 'processes#update'
   delete '/processes/:process_guid/instances/:index', to: 'processes#terminate'
