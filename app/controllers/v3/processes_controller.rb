@@ -61,13 +61,21 @@ class ProcessesController < ApplicationController
     process_attrs[:type] = message.type
     process_attrs[:revision_guid] = message.revision_guid
     process_attrs[:guid] = SecureRandom.uuid
-    process_attrs[:state] = app.desired_state
 
     process = ProcessCreate.new(user_audit_info).create(app, process_attrs)
+
+    ## Force a transition from STOPPED to STARTED to desire on Diego
+    process.reload.update(state: app.desired_state)
 
     render status: :ok, json: Presenters::V3::ProcessPresenter.new(process)
   rescue ProcessCreate::InvalidProcess => e
     unprocessable!(e.message)
+  end
+
+  def delete
+    ProcessDelete.new(user_audit_info).delete([@process])
+
+    head :no_content
   end
 
   def update
