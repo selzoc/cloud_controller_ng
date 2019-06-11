@@ -157,6 +157,10 @@ module VCAP::CloudController
 
     alias_method :diego?, :diego
 
+    def user_managed?
+      managed_by == 'USER'
+    end
+
     def revisions_enabled?
       app.revisions_enabled
     end

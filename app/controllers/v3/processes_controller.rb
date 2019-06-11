@@ -61,6 +61,7 @@ class ProcessesController < ApplicationController
     process_attrs[:type] = message.type
     process_attrs[:revision_guid] = message.revision_guid
     process_attrs[:guid] = SecureRandom.uuid
+    process_attrs[:managed_by] = 'USER'
 
     process = ProcessCreate.new(user_audit_info).create(app, process_attrs)
 
@@ -73,6 +74,8 @@ class ProcessesController < ApplicationController
   end
 
   def delete
+    unprocessable!("this aint ur process") unless @process.user_managed?
+
     ProcessDelete.new(user_audit_info).delete([@process])
 
     head :no_content

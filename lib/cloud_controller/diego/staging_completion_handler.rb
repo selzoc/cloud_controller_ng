@@ -139,7 +139,7 @@ module VCAP::CloudController
 
           app.processes.each do |process|
             process.lock!
-            process.update(revision: revision) if revision
+            process.update(revision: revision) if revision and !process.user_managed?
             Repositories::AppUsageEventRepository.new.create_from_process(process, 'BUILDPACK_SET')
           end
         end
