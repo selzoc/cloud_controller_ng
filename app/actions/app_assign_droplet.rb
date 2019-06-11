@@ -20,6 +20,7 @@ module VCAP::CloudController
 
         record_assign_droplet_event(app, droplet)
         create_processes(app)
+        create_sidecars(app)
 
         app.save
       end

@@ -19,6 +19,11 @@ module VCAP::CloudController
       end
 
       create_requested_processes(app, app.droplet.process_types)
+
+      if app.droplet.buildpack_sidecars:
+
+        create_requested_processes(app, app.droplet.buildpack_sidecars)
+      end
     end
 
     private

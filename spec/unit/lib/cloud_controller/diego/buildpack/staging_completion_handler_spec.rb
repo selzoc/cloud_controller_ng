@@ -52,7 +52,14 @@ module VCAP::CloudController
               execution_metadata: '',
               process_types:      {
                 web: 'some command'
-              }
+              },
+              sidecars: [
+                {
+                  name: 'some sidecar',
+                  command: './pop_a_wheelie',
+                  process_types: [ 'web' ]
+                }
+              ]
             }
           }
         end
@@ -103,6 +110,14 @@ module VCAP::CloudController
               expect {
                 subject.staging_complete(success_response)
               }.to change { build.reload.staged? }.to(true)
+            end
+
+            it 'saves any provided sidecars on the droplet' do
+              subject.staging_complete(success_response)
+
+              expect(droplet.reload.buildpack_sidecars[0]["name"]).to eq('some sidecar')
+              expect(droplet.reload.buildpack_sidecars[0]["command"]).to eq('./pop_a_wheelie')
+              expect(droplet.reload.buildpack_sidecars[0]["process_types"]).to eq(['web'])
             end
 
             context 'when the build does not have a droplet' do
