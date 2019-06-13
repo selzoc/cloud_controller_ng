@@ -1,4 +1,5 @@
 require 'messages/revisions_update_message'
+require 'messages/revision_create_message'
 require 'actions/revisions_update'
 require 'presenters/v3/revision_presenter'
 require 'presenters/v3/revision_environment_variables_presenter'
@@ -6,6 +7,15 @@ require 'presenters/v3/revision_environment_variables_presenter'
 class RevisionsController < ApplicationController
   def show
     revision = fetch_revision(hashed_params[:revision_guid])
+    render status: :ok, json: Presenters::V3::RevisionPresenter.new(revision)
+  end
+
+  def create
+    message = RevisionCreateMessage.new(hashed_params[:body])
+    unprocessable!(message.errors.full_messages) unless message.valid?
+
+    revision = RevisionCreate.create_from_message(message, user_audit_info)
+
     render status: :ok, json: Presenters::V3::RevisionPresenter.new(revision)
   end
 

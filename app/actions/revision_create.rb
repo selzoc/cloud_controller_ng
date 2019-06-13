@@ -28,6 +28,19 @@ module VCAP::CloudController
         end
       end
 
+      def create_from_message(message, user_audit_info)
+        app = AppModel.first(guid: message.app_guid)
+
+        create(
+          app: app,
+          droplet_guid: message.droplet_guid,
+          environment_variables: message.environment_variables,
+          description: message.description,
+          commands_by_process_type: message.commands_by_process_type,
+          user_audit_info: user_audit_info
+        )
+      end
+
       private
 
       def calculate_next_version(app)
