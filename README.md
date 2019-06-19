@@ -33,12 +33,6 @@ The Cloud Controller manages a blobstore for:
  
 Cloud Controller currently supports [webdav](http://www.webdav.org/) and the following [fog](http://fog.io) connectors: 
 
-* Alibaba Cloud (Experimental)
-* Azure
-* Openstack
-* Local (NFS)
-* Google
-* AWS
 
 ### Runtime
 
