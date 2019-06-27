@@ -31,6 +31,8 @@ module VCAP::CloudController::Diego
         space_id:            space.guid,
         organization_id:     space.organization.guid,
         organization_name: space.organization.name,
+        process_id: app.guid,
+        process_type: VCAP::CloudController::ProcessTypes::WEB,
         uris:                [],
         users:               nil
       }
@@ -116,6 +118,8 @@ module VCAP::CloudController::Diego
             space_id:            space.guid,
             organization_id:     space.organization.guid,
             organization_name: space.organization.name,
+            process_id: app.guid,
+            process_type: VCAP::CloudController::ProcessTypes::WEB,
             users:               nil
           }
         end

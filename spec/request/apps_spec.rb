@@ -1015,6 +1015,8 @@ RSpec.describe 'Apps' do
                   'name' => 'my_app',
                   'organization_id' => space.organization.guid,
                   'organization_name' => space.organization.name,
+                  'process_id' => app_model.guid,
+                  'process_type' => VCAP::CloudController::ProcessTypes::WEB,
                   'space_id' => space.guid,
                   'space_name' => space.name,
                 'uris' => [],

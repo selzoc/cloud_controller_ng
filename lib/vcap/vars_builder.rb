@@ -33,6 +33,11 @@ module VCAP
       my_uri        = URI::HTTP.build(host: VCAP::CloudController::Config.config.get(:external_domain))
       my_uri.scheme = VCAP::CloudController::Config.config.get(:external_protocol)
 
+      process_type = if @process.class == VCAP::CloudController::AppModel
+                       VCAP::CloudController::ProcessTypes::WEB
+                     else
+                       @process.type
+                     end
       env_hash = {
         cf_api: my_uri.to_s,
         limits: {},
@@ -43,6 +48,8 @@ module VCAP
         space_id: @space.guid,
         organization_id: @space.organization_guid,
         organization_name: @space.organization.name,
+        process_id: @process.guid,
+        process_type: process_type,
         uris: uris,
         users: nil
       }
