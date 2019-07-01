@@ -7,7 +7,8 @@ module VCAP::CloudController
       {
         name: 'my sidecar',
         command: 'bundle exec rackup',
-        process_types: ['web', 'worker']
+        process_types: ['web', 'worker'],
+        memory: 300
       }
     end
 

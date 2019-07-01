@@ -15,7 +15,8 @@ RSpec.describe 'Sidecars' do
       {
           name: 'sidecar_one',
           command: 'bundle exec rackup',
-          process_types: ['web', 'other_worker']
+          process_types: ['web', 'other_worker'],
+          memory: 300
       }
     }
 
@@ -32,6 +33,7 @@ RSpec.describe 'Sidecars' do
         'name' => 'sidecar_one',
         'command' => 'bundle exec rackup',
         'process_types' => ['other_worker', 'web'],
+        "memory_in_mb" => 300,
         'created_at' => iso8601,
         'updated_at' => iso8601,
         'relationships' => {
