@@ -9,7 +9,7 @@ module VCAP::CloudController
         sidecar = SidecarModel.new(
           app_guid: app_guid,
           name:     message.name,
-          command:  message.command,
+          command:  message.command
         )
 
         SidecarModel.db.transaction do

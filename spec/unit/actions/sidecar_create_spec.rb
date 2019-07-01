@@ -9,6 +9,7 @@ module VCAP::CloudController
         name: 'sidecar-name',
         command: './start',
         process_types: ['web', 'worker'],
+        memory: 300,
       }
     end
     let(:message) { SidecarCreateMessage.new(params) }
@@ -24,6 +25,7 @@ module VCAP::CloudController
         expect(sidecar.name).to eq('sidecar-name')
         expect(sidecar.command).to eq('./start')
         expect(sidecar.process_types).to eq(['web', 'worker'])
+        expect(sidecar.memory).to eq(300)
       end
     end
   end
