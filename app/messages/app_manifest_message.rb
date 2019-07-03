@@ -104,7 +104,7 @@ module VCAP::CloudController
     end
 
     def sidecar_create_messages
-      @sidecar_create_messages ||= Array(sidecars).map { |mapping| SidecarCreateMessage.new(mapping) }
+      @sidecar_create_messages ||= Array(sidecars).map { |mapping| ManifestSidecarCreateMessage.new(mapping) }
     end
 
     def app_update_message
