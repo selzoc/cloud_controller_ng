@@ -443,8 +443,9 @@ module VCAP::CloudController
             'sidecars' => [
               {
                 'process_types' => ['web'],
-                'name' => 'my-sidecar',
+                'name' => 'new-sidecar',
                 'command' => 'rackup',
+                'memory' => '2G',
               },
               {
                 'process_types' => ['web'],
