@@ -1,6 +1,7 @@
 require 'messages/base_message'
 require 'messages/manifest_process_scale_message'
 require 'messages/manifest_process_update_message'
+require 'messages/manifest_sidecar_create_message'
 require 'messages/manifest_buildpack_message'
 require 'messages/manifest_service_binding_create_message'
 require 'messages/manifest_routes_update_message'
@@ -103,8 +104,8 @@ module VCAP::CloudController
       @manifest_process_update_messages ||= process_update_attribute_mappings.map { |mapping| ManifestProcessUpdateMessage.new(mapping) }
     end
 
-    def sidecar_create_messages
-      @sidecar_create_messages ||= Array(sidecars).map { |mapping| ManifestSidecarCreateMessage.new(mapping) }
+    def manifest_sidecar_create_messages
+      @manifest_sidecar_create_messages ||= Array(sidecars).map { |mapping| ManifestSidecarCreateMessage.new(mapping) }
     end
 
     def app_update_message
@@ -400,10 +401,10 @@ module VCAP::CloudController
         return errors.add(:base, 'Sidecars must be an array of sidecar configurations')
       end
 
-      sidecar_create_messages.each do |sidecar_create_message|
-        sidecar_create_message.validate
-        sidecar_create_message.errors.full_messages.each do |message|
-          error = sidecar_create_message.name.present? ? %("#{sidecar_create_message.name}": #{message}) : message.downcase
+      manifest_sidecar_create_messages.each do |manifest_sidecar_create_message|
+        manifest_sidecar_create_message.validate
+        manifest_sidecar_create_message.errors.full_messages.each do |message|
+          error = manifest_sidecar_create_message.name.present? ? %("#{manifest_sidecar_create_message.name}": #{message}) : message.downcase
           errors.add(:sidecar, error)
         end
       end

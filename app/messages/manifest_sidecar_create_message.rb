@@ -13,5 +13,14 @@ module VCAP::CloudController
       too_short: 'must have at least %{count} process_type'
     }
     validates :memory, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
+
+    def to_sidecar_create_message
+      SidecarCreateMessage.new({
+        name: name,
+        command: command,
+        process_types: process_types,
+        memory_in_mb: memory,
+      }.compact)
+    end
   end
 end

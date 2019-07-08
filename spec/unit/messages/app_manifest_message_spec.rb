@@ -1585,8 +1585,8 @@ module VCAP::CloudController
         it 'returns sidecar update messages' do
           message = AppManifestMessage.create_from_yml(parsed_yaml, params)
           expect(message).to be_valid
-          expect(message.sidecar_create_messages.length).to eq(2)
-          expect(message.sidecar_create_messages.map(&:name)).to eq(['my_sidecar', 'my_second_sidecar'])
+          expect(message.manifest_sidecar_create_messages.length).to eq(2)
+          expect(message.manifest_sidecar_create_messages.map(&:name)).to eq(['my_sidecar', 'my_second_sidecar'])
         end
       end
 
@@ -1599,7 +1599,7 @@ module VCAP::CloudController
         it 'returns an empty array' do
           message = AppManifestMessage.create_from_yml(parsed_yaml, params)
           expect(message).to be_valid
-          expect(message.sidecar_create_messages).to eq([])
+          expect(message.manifest_sidecar_create_messages).to eq([])
         end
       end
     end

@@ -131,7 +131,7 @@ RSpec.describe 'App Manifests' do
             'process_types' => ['worker'],
             'command'       => 'bundle exec sidecar_for_web_only',
             'name'          => 'my-sidecar',
-            'memory_in_mb'  => 300,
+            'memory'        => 300,
           }
         ]
       end
