@@ -105,7 +105,9 @@ module VCAP::CloudController
     end
 
     def manifest_sidecar_create_messages
-      @manifest_sidecar_create_messages ||= Array(sidecars).map { |mapping| ManifestSidecarCreateMessage.new(mapping) }
+      @manifest_sidecar_create_messages ||= sidecar_create_attribute_mappings.map {
+        |mapping| SidecarCreateMessage.new(mapping)
+      }
     end
 
     def app_update_message
@@ -180,7 +182,7 @@ module VCAP::CloudController
       process_attributes
     end
 
-    def process_scale_attributes(memory:, disk_quota:, instances:, type: nil)
+    def process_scale_attributes(memory: nil, disk_quota: nil, instances:, type: nil)
       memory_in_mb = convert_to_mb(memory)
       disk_in_mb = convert_to_mb(disk_quota)
       {
@@ -190,6 +192,28 @@ module VCAP::CloudController
         type: type
       }.compact
     end
+
+
+    def sidecar_create_attribute_mappings
+      return [] unless requested?(:sidecars)
+      sidecars.map do |sidecar|
+        sidecar_create_attributes(name: sidecar[:name],
+                                  memory: sidecar[:memory],
+                                  command: sidecar[:command],
+                                  process_types: sidecar[:process_types])
+      end
+    end
+
+    def sidecar_create_attributes(name:, memory: nil, command:, process_types: nil)
+      memory_in_mb = convert_to_mb(memory) || memory
+      {
+        name: name,
+        memory_in_mb: memory_in_mb,
+        command: command,
+        process_types: process_types,
+      }.compact
+    end
+
 
     def process_update_attributes_from_app_level
       mapping = {}

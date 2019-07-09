@@ -7,22 +7,13 @@ module VCAP::CloudController
       def create(app_guid, message)
         logger = Steno.logger('cc.action.sidecar_create')
 
-        # memory = message.requested?(:memory_in_mb) ? message.memory_in_mb : message.memory
-
-        if message.requested?(:memory_in_mb)
-          memory = message.memory_in_mb
-        elsif message.requested?(:memory)
-          memory = message.memory
-        end
-
-
         validate_memory_allocation!(app_guid, message) if message.requested?(:memory_in_mb) || message.requested?(:memory)
 
         sidecar = SidecarModel.new(
           app_guid: app_guid,
           name:     message.name,
           command:  message.command,
-          memory:  memory,
+          memory:  message.memory_in_mb,
         )
 
         SidecarModel.db.transaction do

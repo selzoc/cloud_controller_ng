@@ -4,18 +4,13 @@ module VCAP::CloudController
 
     class << self
       def update(sidecar, message)
-        if message.requested?(:memory_in_mb)
-          sidecar.memory = message.memory_in_mb
-        elsif message.requested?(:memory)
-          sidecar.memory = message.memory
-        end
-
-        if message.requested?(:memory_in_mb) || message.requested?(:process_types) || message.requested?(:memory)
+        if message.requested?(:memory_in_mb) || message.requested?(:process_types)
           validate_memory_allocation!(message, sidecar)
         end
 
         sidecar.name    = message.name    if message.requested?(:name)
         sidecar.command = message.command if message.requested?(:command)
+        sidecar.memory  = message.memory_in_mb if message.requested?(:memory_in_mb)
 
 
         SidecarModel.db.transaction do
@@ -45,7 +40,11 @@ module VCAP::CloudController
                         else
                           sidecar.process_types
                         end
-        memory = sidecar.memory
+        memory = if message.requested?(:memory_in_mb)
+                   message.memory_in_mb
+                 else
+                   sidecar.memory
+                 end
 
         processes = ProcessModel.where(
           app_guid: sidecar.app.guid,

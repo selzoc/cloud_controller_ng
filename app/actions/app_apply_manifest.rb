@@ -40,9 +40,9 @@ module VCAP::CloudController
       message.manifest_sidecar_create_messages.each do |manifest_sidecar_create_message|
         sidecar = find_sidecar(app, manifest_sidecar_create_message.name)
         if sidecar
-          SidecarUpdate.update(sidecar, manifest_sidecar_create_message.to_sidecar_create_message)
+          SidecarUpdate.update(sidecar, manifest_sidecar_create_message)
         else
-          SidecarCreate.create(app.guid, manifest_sidecar_create_message.to_sidecar_create_message)
+          SidecarCreate.create(app.guid, manifest_sidecar_create_message)
         end
       end
 
