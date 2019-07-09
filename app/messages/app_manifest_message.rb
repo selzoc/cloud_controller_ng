@@ -181,8 +181,8 @@ module VCAP::CloudController
     end
 
     def process_scale_attributes(memory: nil, disk_quota: nil, instances:, type: nil)
-      memory_in_mb = convert_to_mb(memory)
-      disk_in_mb = convert_to_mb(disk_quota)
+      memory_in_mb = convert_to_mb(memory) || memory
+      disk_in_mb = convert_to_mb(disk_quota) || disk_quota
       {
         instances: instances,
         memory: memory_in_mb,
