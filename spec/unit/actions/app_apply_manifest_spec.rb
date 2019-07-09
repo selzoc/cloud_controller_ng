@@ -443,7 +443,7 @@ module VCAP::CloudController
             'sidecars' => [
               {
                 'process_types' => ['web'],
-                'name' => 'my-sidecar',
+                'name' => 'new-sidecar',
                 'command' => 'rackup',
                 'memory' => '2GB',
               },
@@ -466,13 +466,13 @@ module VCAP::CloudController
               expect(sidecar_create_message.process_types).to match_array(['web'])
               expect(sidecar_create_message.name).to eq('existing-sidecar')
               expect(sidecar_create_message.command).to eq('rackup')
-              expect(sidecar_create_message.memory).to eq(2000)
             end
             expect(SidecarCreate).to have_received(:create) do |sidecar_in_create, sidecar_create_message|
               expect(sidecar_in_create).not_to eq(sidecar)
               expect(sidecar_create_message.process_types).to match_array(['web'])
-              expect(sidecar_create_message.name).to eq('my-sidecar')
+              expect(sidecar_create_message.name).to eq('new-sidecar')
               expect(sidecar_create_message.command).to eq('rackup')
+              expect(sidecar_create_message.memory_in_mb).to eq(2048)
             end
           end
         end

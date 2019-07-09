@@ -105,9 +105,7 @@ module VCAP::CloudController
     end
 
     def manifest_sidecar_create_messages
-      @manifest_sidecar_create_messages ||= sidecar_create_attribute_mappings.map {
-        |mapping| SidecarCreateMessage.new(mapping)
-      }
+      @manifest_sidecar_create_messages ||= sidecar_create_attribute_mappings.map { |mapping| SidecarCreateMessage.new(mapping) }
     end
 
     def app_update_message
