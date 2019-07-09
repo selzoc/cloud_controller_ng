@@ -648,7 +648,7 @@ module VCAP::CloudController
             message = AppManifestMessage.create_from_yml(params_from_yaml, params)
             expect(message).not_to be_valid
             expect(message.errors.count).to eq(1)
-            expect(message.errors.full_messages).to include("Sidecar \"sylvester\": Memory in mb is not a number")
+            expect(message.errors.full_messages).to include('Sidecar "sylvester": Memory in mb is not a number')
           end
         end
 

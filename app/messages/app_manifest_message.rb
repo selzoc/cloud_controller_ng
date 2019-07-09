@@ -191,9 +191,9 @@ module VCAP::CloudController
       }.compact
     end
 
-
     def sidecar_create_attribute_mappings
       return [] unless requested?(:sidecars)
+
       sidecars.map do |sidecar|
         sidecar_create_attributes(name: sidecar[:name],
                                   memory: sidecar[:memory],
@@ -211,7 +211,6 @@ module VCAP::CloudController
         process_types: process_types,
       }.compact
     end
-
 
     def process_update_attributes_from_app_level
       mapping = {}

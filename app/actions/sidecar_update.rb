@@ -12,7 +12,6 @@ module VCAP::CloudController
         sidecar.command = message.command if message.requested?(:command)
         sidecar.memory  = message.memory_in_mb if message.requested?(:memory_in_mb)
 
-
         SidecarModel.db.transaction do
           sidecar.save
 

@@ -51,7 +51,7 @@ module VCAP::CloudController
       end
 
       it 'validates that there is a process_types field' do
-        message = SidecarCreateMessage.new(body.reject {|x| x == :process_types })
+        message = SidecarCreateMessage.new(body.reject { |x| x == :process_types })
 
         expect(message).to_not be_valid
         expect(message.errors.full_messages).to include('Process types must have at least 1 process_type')
