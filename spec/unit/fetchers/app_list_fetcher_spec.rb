@@ -4,6 +4,7 @@ require 'messages/apps_list_message'
 module VCAP::CloudController
   RSpec.describe AppListFetcher do
     describe '#fetch' do
+      let!(:stack) { Stack.make }
       let(:space) { Space.make }
       let(:app) { AppModel.make(space_guid: space.guid, name: 'app') }
       let(:sad_app) { AppModel.make(space_guid: space.guid) }
@@ -13,12 +14,23 @@ module VCAP::CloudController
       let(:pagination_options) { PaginationOptions.new({}) }
       let(:filters) { {} }
       let(:message) { AppsListMessage.from_params(filters) }
+      let!(:app_without_stack) { AppModel.make }
+      let!(:lifecycle_data_for_app) {
+        BuildpackLifecycleDataModel.make(app: app, stack: stack)
+      }
+      let!(:lifecycle_data_for_sad_app) {
+        BuildpackLifecycleDataModel.make(app: sad_app, stack: stack)
+      }
+      let!(:lifecycle_data_for_app_without_stack) {
+        BuildpackLifecycleDataModel.make(app: app_without_stack, stack: nil)
+      }
 
       apps = nil
 
       before do
         app.save
         sad_app.save
+        app_without_stack.save
         expect(message).to be_valid
         apps = fetcher.fetch(message, space_guids)
       end
@@ -29,12 +41,12 @@ module VCAP::CloudController
 
       it 'fetch_all includes all the apps' do
         app = AppModel.make
-        expect(fetcher.fetch_all(message).all).to include(app)
+        expect(fetcher.fetch_all(message).all).to include(app, sad_app)
       end
 
       context 'when no filters are specified' do
         it 'returns all of the desired apps' do
-          expect(apps.all).to include(app, sad_app)
+          expect(apps.all).to contain_exactly(app, sad_app)
         end
       end
 
@@ -42,8 +54,7 @@ module VCAP::CloudController
         let(:filters) { { names: [app.name] } }
 
         it 'returns all of the desired apps' do
-          expect(apps.all).to include(app)
-          expect(apps.all).to_not include(sad_app)
+          expect(apps.all).to contain_exactly(app)
         end
       end
 
@@ -52,8 +63,7 @@ module VCAP::CloudController
         let(:sad_app) { AppModel.make }
 
         it 'returns all of the desired apps' do
-          expect(apps.all).to include(app)
-          expect(apps.all).to_not include(sad_app)
+          expect(apps.all).to contain_exactly(app)
         end
       end
 
@@ -65,17 +75,23 @@ module VCAP::CloudController
         let(:space_guids) { [space.guid, sad_space.guid] }
 
         it 'returns all of the desired apps' do
-          expect(apps.all).to include(app)
-          expect(apps.all).to_not include(sad_app)
+          expect(apps.all).to contain_exactly(app)
         end
       end
 
-      context 'when the stacks are provided' do
-        let(:filters) { { stacks: [app.buildpack_lifecycle_data.stack] } }
+      context 'when a stack is provided' do
+        let(:filters) { { stacks: [stack.name] } }
 
         it 'returns all of the desired apps' do
-          expect(apps.all).to include(app)
-          expect(apps.all).to_not include(sad_app)
+          expect(apps.all).to contain_exactly(app)
+        end
+      end
+
+      context 'when an empty stack is provided' do
+        let(:filters) { { stacks: [''] } }
+
+        it 'returns all of the desired apps' do
+          expect(apps.all).to contain_exactly(app_without_stack)
         end
       end
 
@@ -83,8 +99,7 @@ module VCAP::CloudController
         let(:filters) { { guids: [app.guid] } }
 
         it 'returns all of the desired apps' do
-          expect(apps.all).to include(app)
-          expect(apps.all).to_not include(sad_app)
+          expect(apps.all).to contain_exactly(app)
         end
       end
 
@@ -98,8 +113,7 @@ module VCAP::CloudController
         end
 
         it 'returns all of the desired apps' do
-          expect(apps.all).to include(app)
-          expect(apps.all).to_not include(sad_app)
+          expect(apps.all).to contain_exactly(app)
         end
 
         context 'and other filters are present' do
