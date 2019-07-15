@@ -1,8 +1,8 @@
 require 'messages/route_create_message'
 require 'messages/routes_list_message'
-require 'actions/route_mapping_create'
-require 'messages/route_mappings_create_message'
-require 'messages/route_mappings_list_message'
+# require 'actions/route_mapping_create'
+# require 'messages/route_mappings_create_message'
+# require 'messages/route_mappings_list_message'
 require 'messages/route_show_message'
 require 'messages/route_update_message'
 require 'messages/route_update_destinations_message'
@@ -13,7 +13,7 @@ require 'presenters/v3/paginated_list_presenter'
 require 'actions/route_create'
 require 'actions/route_delete'
 require 'actions/route_update'
-require 'fetchers/add_route_fetcher'
+# require 'fetchers/add_route_fetcher'
 require 'fetchers/app_fetcher'
 require 'fetchers/route_fetcher'
 
@@ -119,7 +119,7 @@ class RoutesController < ApplicationController
     validate_app_guids!(apps_hash, desired_app_guids)
     validate_app_spaces!(apps_hash, route)
 
-    route = UpdateRouteDestinations.add(message, route, user_audit_info)
+    route = UpdateRouteDestinations.add(message.destinations_array, route, user_audit_info)
 
     render status: :ok, json: Presenters::V3::RouteDestinationsPresenter.new(route)
   rescue UpdateRouteDestinations::Error => e
@@ -141,7 +141,7 @@ class RoutesController < ApplicationController
     validate_app_guids!(apps_hash, desired_app_guids)
     validate_app_spaces!(apps_hash, route)
 
-    route = UpdateRouteDestinations.replace(message, route, user_audit_info)
+    route = UpdateRouteDestinations.replace(message.destinations_array, route, user_audit_info)
 
     render status: :ok, json: Presenters::V3::RouteDestinationsPresenter.new(route)
   end

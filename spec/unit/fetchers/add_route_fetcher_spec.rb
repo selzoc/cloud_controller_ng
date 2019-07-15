@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'fetchers/add_route_fetcher'
 
 module VCAP::CloudController
   RSpec.describe AddRouteFetcher do
