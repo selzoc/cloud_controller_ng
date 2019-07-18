@@ -9,7 +9,7 @@ module VCAP::CloudController
     end
 
     def fetch_all(message:)
-      dataset = Organization.dataset
+      dataset = Organization.dataset.eager(:quota_definition, :labels, :annotations)
       filter(message, dataset)
     end
 
