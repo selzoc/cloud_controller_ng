@@ -202,6 +202,35 @@ RSpec.describe 'Route Destinations Request' do
         set_current_user_as_role(user: user, role: 'space_developer', org: space.organization, space: space)
       end
 
+      context '(DOCKER) when adding a destination to a process that already has one' do
+        let(:app_model) { VCAP::CloudController::AppModel.make(:docker, space: space) }
+        let!(:process_model) { VCAP::CloudController::ProcessModel.make(:docker, app: app_model, type: 'web') }
+        let!(:existing_destination) do
+          VCAP::CloudController::RouteMappingModel.make(
+            app: app_model,
+            route: route,
+            process_type: 'web',
+          )
+        end
+        let(:params) do
+          {
+            destinations: [
+              {
+                app: {
+                  guid: app_model.guid,
+                },
+                port: 1234
+              }
+            ]
+          }
+        end
+
+        it 'works' do
+          post "/v3/routes/#{route.guid}/destinations", params.to_json, user_header
+          expect(last_response.status).to eq(200)
+        end
+      end
+
       context 'when the route does not exist' do
         it 'returns not found' do
           post '/v3/routes/does-not-exist/destinations', params.to_json, user_header
