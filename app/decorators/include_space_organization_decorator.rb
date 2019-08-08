@@ -1,13 +1,16 @@
 module VCAP::CloudController
-  class IncludeSpaceOrganizationDecorator
+  class IncludeSpaceOrganizationDecorator < IncludeDecorator
     class << self
-      def decorate(hash, spaces)
-        hash[:included] ||= {}
-        organization_guids = spaces.map(&:organization_guid).uniq
-        organizations = Organization.where(guid: organization_guids).order(:created_at)
+      def association_name
+        'organization'
+      end
 
-        hash[:included][:organizations] = organizations.map { |organization| Presenters::V3::OrganizationPresenter.new(organization).to_hash }
-        hash
+      def association_class
+        Organization
+      end
+
+      def presenter
+        Presenters::V3::OrganizationPresenter
       end
     end
   end
