@@ -1,5 +1,5 @@
 module VCAP::CloudController
-  class IncludeSpaceOrganizationDecorator < IncludeDecorator
+  class IncludeOrganizationDecorator < IncludeDecorator
     class << self
       def association_name
         'organization'

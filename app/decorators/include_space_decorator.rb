@@ -1,7 +1,7 @@
 require 'decorators/include_decorator'
 
 module VCAP::CloudController
-  class IncludeAppSpaceDecorator < IncludeDecorator
+  class IncludeSpaceDecorator < IncludeDecorator
     class << self
       def association_name
         'space'
