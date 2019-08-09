@@ -19,8 +19,8 @@ class SpacesV3Controller < ApplicationController
     message = SpacesListMessage.from_params(query_params)
     invalid_param!(message.errors.full_messages) unless message.valid?
 
-    decorators = []
-    decorators << IncludeOrganizationDecorator if message.include&.include?('org')
+    include = message.include || []
+    decorators = include.map { |include_name| IncludeDecoratorRegistry.for_include(include_name) }
 
     render status: :ok, json: Presenters::V3::PaginatedListPresenter.new(
       presenter: Presenters::V3::SpacePresenter,
@@ -38,8 +38,8 @@ class SpacesV3Controller < ApplicationController
     space_not_found! unless space && permission_queryer.can_read_from_space?(space.guid, space.organization.guid)
     invalid_param!(message.errors.full_messages) unless message.valid?
 
-    decorators = []
-    decorators << IncludeOrganizationDecorator if message.include&.include?('org')
+    include = message.include || []
+    decorators = include.map { |include_name| IncludeDecoratorRegistry.for_include(include_name) }
 
     render status: :ok, json: Presenters::V3::SpacePresenter.new(space, decorators: decorators)
   end

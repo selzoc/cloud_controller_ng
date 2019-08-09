@@ -3,6 +3,10 @@ require 'decorators/include_decorator'
 module VCAP::CloudController
   class IncludeOrganizationDecorator < IncludeDecorator
     class << self
+      def include_name
+        'org'
+      end
+
       def association_name
         'organization'
       end
@@ -16,4 +20,6 @@ module VCAP::CloudController
       end
     end
   end
+
+  IncludeDecoratorRegistry.register(IncludeOrganizationDecorator)
 end
