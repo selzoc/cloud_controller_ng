@@ -99,3 +99,5 @@ group :development do
   gem 'spork', git: 'https://github.com/sporkrb/spork', ref: '224df49' # '~> 1.0rc'
   gem 'spring'
 end
+
+gem 'kramdown'

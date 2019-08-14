@@ -486,6 +486,7 @@ DEPENDENCIES
   httpclient
   json-schema
   json_pure
+  kramdown
   listen
   loggregator_emitter (~> 5.0)
   machinist (~> 1.0.6)
