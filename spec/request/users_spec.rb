@@ -8,18 +8,17 @@ RSpec.describe 'Users Request' do
   let(:admin_header) { headers_for(user, scopes: %w(cloud_controller.admin)) }
   let(:user_header) { headers_for(user, scopes: []) }
   let(:uaa_client) { instance_double(VCAP::CloudController::UaaClient) }
-  let(:other_user) { VCAP::CloudController::User.make }
+  let(:other_user_guid) { 'some-user-guid' }
+
   before do
     VCAP::CloudController::User.dataset.destroy # this will clean up the seeded test users
     allow(VCAP::CloudController::UaaClient).to receive(:new).and_return(uaa_client)
   end
 
   describe 'POST /v3/users' do
-
-
     let(:params) do
       {
-        guid: 'some-user-guid',
+        guid: other_user_guid,
       }
     end
 
@@ -59,7 +58,7 @@ RSpec.describe 'Users Request' do
 
     describe 'when creating a user that exists in uaa' do
       before do
-        allow(uaa_client).to receive(:usernames_for_ids).and_return({ other_user.guid => other_user.username })
+        allow(uaa_client).to receive(:usernames_for_ids).and_return({ other_user_guid => 'bob-mcjames' })
       end
 
       let(:api_call) { lambda { |user_headers| post '/v3/users', params.to_json, user_headers } }
@@ -69,8 +68,8 @@ RSpec.describe 'Users Request' do
           guid: params[:guid],
           created_at: iso8601,
           updated_at: iso8601,
-          username: other_user.username,
-          presentation_name: other_user.username,
+          username: 'bob-mcjames',
+          presentation_name: 'bob-mcjames',
           links: {
             self: { href: %r(#{Regexp.escape(link_prefix)}\/v3\/users\/#{params[:guid]}) },
           }
@@ -128,23 +127,21 @@ RSpec.describe 'Users Request' do
         end
       end
 
-      describe 'collisions' do
-        context 'with an existing user' do
-          let!(:existing_user) { VCAP::CloudController::User.make }
+      context 'with an existing user' do
+        let!(:existing_user) { VCAP::CloudController::User.make }
 
-          let(:params) do
-            {
-              guid: existing_user.guid,
-            }
-          end
+        let(:params) do
+          {
+            guid: existing_user.guid,
+          }
+        end
 
-          it 'returns 422' do
-            post '/v3/users', params.to_json, headers
+        it 'returns 422' do
+          post '/v3/users', params.to_json, headers
 
-            expect(last_response.status).to eq(422)
+          expect(last_response.status).to eq(422)
 
-            expect(parsed_response['errors'][0]['detail']).to eq "User with guid \"#{user.guid}\" already exists."
-          end
+          expect(parsed_response['errors'][0]['detail']).to eq "User with guid '#{existing_user.guid}' already exists."
         end
       end
     end

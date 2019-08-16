@@ -37,20 +37,6 @@ module VCAP::CloudController
       end
 
       context 'guid' do
-        MAX_SUBDOMAIN_LENGTH = DomainCreateMessage::MAXIMUM_DOMAIN_LABEL_LENGTH
-
-        context 'when a valid long multi-subdomain name is given' do
-          let(:params) do
-            {
-              name: (['a'] * 126).join('.'),
-            }
-          end
-
-          it 'is valid' do
-            expect(subject).to be_valid
-          end
-        end
-
         context 'when not a string' do
           let(:params) do
             { guid: 5 }
@@ -67,52 +53,25 @@ module VCAP::CloudController
 
           it 'is not valid' do
             expect(subject).to be_invalid
-            expect(subject.errors[:name]).to include "is too short (minimum is #{MIN_DOMAIN_NAME_LENGTH} characters)"
+            expect(subject.errors[:guid]).to include 'is too short (minimum is 1 character)'
           end
         end
 
         context 'when it is too long' do
-          let(:params) { { name: 'B' * (MAX_DOMAIN_NAME_LENGTH + 1) } }
+          let(:params) { { guid: 'B' * (250 + 1) } }
 
           it 'is not valid' do
             expect(subject).to be_invalid
-            expect(subject.errors[:name]).to include "is too long (maximum is #{MAX_DOMAIN_NAME_LENGTH} characters)"
-          end
-        end
-
-        context 'when it does not contain a .' do
-          let(:params) { { name: 'idontlikedots' } }
-
-          it 'is not valid' do
-            expect(subject).to be_invalid
-            expect(subject.errors[:name]).to match ['does not comply with RFC 1035 standards', 'must contain at least one "."']
-          end
-        end
-
-        context 'when the subdomain is too long' do
-          let(:params) { { name: 'B' * (MAX_SUBDOMAIN_LENGTH + 1) + '.example.com' } }
-
-          it 'is not valid' do
-            expect(subject).to be_invalid
-            expect(subject.errors[:name]).to include 'subdomains must each be at most 63 characters'
+            expect(subject.errors[:guid]).to include 'is too long (maximum is 250 characters)'
           end
         end
 
         context 'when it contains invalid characters' do
-          let(:params) { { name: '_!@#$%^&*().swag' } }
+          let(:params) { { guid: '_!@#$%^&*().swag' } }
 
           it 'is not valid' do
             expect(subject).to be_invalid
-            expect(subject.errors[:name]).to include 'must consist of alphanumeric characters and hyphens'
-          end
-        end
-
-        context 'when it does not conform to RFC 1035' do
-          let(:params) { { name: 'B' * (MAX_SUBDOMAIN_LENGTH + 1) + '.example.com' } }
-
-          it 'is not valid' do
-            expect(subject).to be_invalid
-            expect(subject.errors[:name]).to include 'does not comply with RFC 1035 standards'
+            expect(subject.errors[:guid]).to include 'must consist of alphanumeric characters and hyphens'
           end
         end
       end

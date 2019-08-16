@@ -203,7 +203,7 @@ Rails.application.routes.draw do
   patch '/stacks/:guid', to: 'stacks#update'
   delete '/stacks/:guid', to: 'stacks#destroy'
 
-  #users
+  # users
   post '/users', to: 'users#create'
 
   # buildpacks
