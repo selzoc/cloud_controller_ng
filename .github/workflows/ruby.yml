@@ -5,7 +5,7 @@ on: [push]
 jobs:
   build:
 
-    runs-on: cloudfoudry/capi:ruby-units
+    runs-on: ubuntu-18.04
 
     steps:
     - uses: actions/checkout@v1
